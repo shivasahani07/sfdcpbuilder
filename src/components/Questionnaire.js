@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { domains, industries, getModulesForSelection } from '../data/modulesData';
+import CustomQuestions from './CustomQuestions';
+import ImplementationTimeline from './ImplementationTimeline';
 import './Questionnaire.css';
 
 const Questionnaire = ({ onModulesSelected }) => {
@@ -7,6 +9,9 @@ const Questionnaire = ({ onModulesSelected }) => {
   const [selectedDomain, setSelectedDomain] = useState('');
   const [selectedIndustry, setSelectedIndustry] = useState('');
   const [selectedModules, setSelectedModules] = useState([]);
+  const [customAnswers, setCustomAnswers] = useState({});
+  const [showCustomQuestions, setShowCustomQuestions] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
 
   const handleDomainSelect = (domain) => {
     setSelectedDomain(domain);
@@ -32,10 +37,27 @@ const Questionnaire = ({ onModulesSelected }) => {
   };
 
   const handleSubmit = () => {
+    if (selectedModules.length === 0) {
+      alert('Please select at least one module before proceeding.');
+      return;
+    }
+    
+    setShowCustomQuestions(true);
+  };
+
+  const handleCustomQuestionsComplete = (answers) => {
+    setCustomAnswers(answers);
+    setShowCustomQuestions(false);
+    setShowTimeline(true);
+  };
+
+  const handleTimelineComplete = () => {
+    setShowTimeline(false);
     onModulesSelected({
       domain: selectedDomain,
       industry: selectedIndustry,
-      modules: selectedModules
+      modules: selectedModules,
+      customAnswers: customAnswers
     });
   };
 
@@ -43,10 +65,34 @@ const Questionnaire = ({ onModulesSelected }) => {
     setSelectedDomain('');
     setSelectedIndustry('');
     setSelectedModules([]);
+    setCustomAnswers({});
+    setShowCustomQuestions(false);
+    setShowTimeline(false);
     setCurrentStep(1);
   };
 
   const availableModules = getModulesForSelection(selectedDomain, selectedIndustry);
+
+  if (showCustomQuestions) {
+    return (
+      <CustomQuestions
+        domain={selectedDomain}
+        industry={selectedIndustry}
+        onAnswersComplete={handleCustomQuestionsComplete}
+      />
+    );
+  }
+
+  if (showTimeline) {
+    return (
+      <ImplementationTimeline
+        selectedModules={selectedModules}
+        domain={selectedDomain}
+        industry={selectedIndustry}
+        onComplete={handleTimelineComplete}
+      />
+    );
+  }
 
   return (
     <div className="questionnaire">

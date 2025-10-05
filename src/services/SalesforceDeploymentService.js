@@ -138,6 +138,91 @@ export class SalesforceDeploymentService {
       });
     }
 
+    if (industry === 'Real Estate') {
+      fields.push({
+        fullName: 'Property_Type__c',
+        label: 'Property Type',
+        type: 'Picklist',
+        required: true,
+        valueSet: {
+          valueSetDefinition: {
+            value: [
+              { fullName: 'Residential' },
+              { fullName: 'Commercial' },
+              { fullName: 'Industrial' },
+              { fullName: 'Land' },
+              { fullName: 'Mixed Use' }
+            ]
+          }
+        }
+      });
+      
+      fields.push({
+        fullName: 'Property_Address__c',
+        label: 'Property Address',
+        type: 'Text',
+        length: 255,
+        required: true
+      });
+      
+      fields.push({
+        fullName: 'Property_Value__c',
+        label: 'Property Value',
+        type: 'Currency',
+        precision: 18,
+        scale: 2
+      });
+      
+      fields.push({
+        fullName: 'Square_Footage__c',
+        label: 'Square Footage',
+        type: 'Number',
+        precision: 10,
+        scale: 0
+      });
+      
+      fields.push({
+        fullName: 'Bedrooms__c',
+        label: 'Bedrooms',
+        type: 'Number',
+        precision: 2,
+        scale: 0
+      });
+      
+      fields.push({
+        fullName: 'Bathrooms__c',
+        label: 'Bathrooms',
+        type: 'Number',
+        precision: 3,
+        scale: 1
+      });
+      
+      fields.push({
+        fullName: 'Year_Built__c',
+        label: 'Year Built',
+        type: 'Number',
+        precision: 4,
+        scale: 0
+      });
+      
+      fields.push({
+        fullName: 'Listing_Status__c',
+        label: 'Listing Status',
+        type: 'Picklist',
+        valueSet: {
+          valueSetDefinition: {
+            value: [
+              { fullName: 'Active' },
+              { fullName: 'Pending' },
+              { fullName: 'Sold' },
+              { fullName: 'Withdrawn' },
+              { fullName: 'Coming Soon' }
+            ]
+          }
+        }
+      });
+    }
+
     return fields;
   }
 
@@ -235,6 +320,40 @@ export class SalesforceDeploymentService {
         errorConditionFormula: 'ISBLANK(Patient_ID__c)',
         errorMessage: 'Patient ID is required for healthcare records',
         errorDisplayField: 'Patient_ID__c'
+      });
+    }
+
+    if (industry === 'Real Estate') {
+      rules.push({
+        fullName: `${industry}_${module.name.replace(/\s+/g, '_')}__c.Property_Address_Required`,
+        active: true,
+        errorConditionFormula: 'ISBLANK(Property_Address__c)',
+        errorMessage: 'Property Address is required for real estate records',
+        errorDisplayField: 'Property_Address__c'
+      });
+      
+      rules.push({
+        fullName: `${industry}_${module.name.replace(/\s+/g, '_')}__c.Property_Value_Positive`,
+        active: true,
+        errorConditionFormula: 'Property_Value__c <= 0',
+        errorMessage: 'Property Value must be greater than zero',
+        errorDisplayField: 'Property_Value__c'
+      });
+      
+      rules.push({
+        fullName: `${industry}_${module.name.replace(/\s+/g, '_')}__c.Year_Built_Valid`,
+        active: true,
+        errorConditionFormula: 'Year_Built__c < 1800 || Year_Built__c > YEAR(TODAY())',
+        errorMessage: 'Year Built must be between 1800 and current year',
+        errorDisplayField: 'Year_Built__c'
+      });
+      
+      rules.push({
+        fullName: `${industry}_${module.name.replace(/\s+/g, '_')}__c.Square_Footage_Positive`,
+        active: true,
+        errorConditionFormula: 'Square_Footage__c <= 0',
+        errorMessage: 'Square Footage must be greater than zero',
+        errorDisplayField: 'Square_Footage__c'
       });
     }
 
